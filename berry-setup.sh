@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#sudo apt-get update
-#sudo apt-get -y dist-upgrade
+sudo apt-get update
+sudo apt-get -y dist-upgrade
 
 locale_pkg=$(dpkg -l locales | grep -i locales)
 installed=$(echo $locale_pkg | awk '{print $1}')
