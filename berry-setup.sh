@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
 
+ORIGIN_DIR=$(pwd)
+TEMP_DIR=$ORIGIN_DIR/temp
+
 function program_exists {
     local return_=0
     hash $1 2>/dev/null || { local return_=1;}  
     echo "$return_"
+}
+
+function script_setup {
+
+}
+
+function script_cleanup {
+    echo "Removing Temp Directory"
+    rm -rf $TEMP_DIR
 }
 
 #$sudo apt-get -y update
@@ -43,7 +55,6 @@ else
     sed "/^export ZSH=/ c\ ZSH=$ZSH" ~/.zshrc > ~/.zshrc-temp && mv ~/.zshrc-temp ~/.zshrc
 fi
 
-
 #VIM Setup
 if [ $(program_exists vim) -eq 0 ]; then
     echo "VIM Already Installed"
@@ -57,3 +68,23 @@ if [ $(program_exists tmux) -eq 0 ]; then
 else
     sudo apt-get -y install tmux
 fi
+
+#Setup Bash Support (IDE Behavior)
+if [ ! -d $TEMP_DIR ]; then
+    mkdir $TEMP_DIR
+fi
+
+cd $TEMP_DIR
+
+curl -o bash-support.zip http://www.vim.org/scripts/download_script.php?src_id=9890
+if [ ! -d ~/.vim ]; then
+    mkdir ~/.vim
+fi
+
+cd ~/.vim
+unzip $TEMP_DIR/bash-support.zip
+
+echo "Generating Helptags for Bash Support"
+helpztags ~/.vim/doc
+
+script_cleanup
