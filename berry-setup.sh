@@ -10,8 +10,12 @@ function program_exists {
 }
 
 function script_cleanup {
-    echo "Removing Temp Directory"
-    rm -rf $TEMP_DIR
+    if [ -d "$TEMP_DIR" ]; then
+        echo "Removing Temp Directory"
+        rm -rf $TEMP_DIR
+    fi
+    
+    echo "Cleanup Complete"
 }
 
 #$sudo apt-get -y update
@@ -46,7 +50,7 @@ if [ -d "$ZSH" ]; then
     printf "Oh My Zsh Already Installed\n"
     printf "Remove $ZSH if you want to re-install\n"
 else
-    git clone git://github.com/robbyrussell/oh-my-zsh.git $ZSH
+    git clone --depth=1 git://github.com/robbyrussell/oh-my-zsh.git $ZSH
     cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
     sed "/^export ZSH=/ c\ ZSH=$ZSH" ~/.zshrc > ~/.zshrc-temp && mv ~/.zshrc-temp ~/.zshrc
 fi
@@ -72,15 +76,19 @@ fi
 
 cd $TEMP_DIR
 
-curl -o bash-support.zip http://www.vim.org/scripts/download_script.php?src_id=9890
 if [ ! -d ~/.vim ]; then
     mkdir ~/.vim
 fi
 
-cd ~/.vim
-unzip $TEMP_DIR/bash-support.zip
+if [ ! -d ~/.vim/bash-support ]; then
+    curl -o bash-support.zip http://www.vim.org/scripts/download_script.php?src_id=9890
+    cd ~/.vim
+    unzip $TEMP_DIR/bash-support.zip
 
-echo "Generating Helptags for Bash Support"
-helpztags ~/.vim/doc
+    echo "Generating Helptags for Bash Support"
+    helpztags ~/.vim/doc
+else
+    echo "Bash Support Plugin is Already Installed"
+fi
 
 script_cleanup
