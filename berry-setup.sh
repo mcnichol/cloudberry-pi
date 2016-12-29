@@ -9,10 +9,6 @@ function program_exists {
     echo "$return_"
 }
 
-function script_setup {
-
-}
-
 function script_cleanup {
     echo "Removing Temp Directory"
     rm -rf $TEMP_DIR
