@@ -2,6 +2,7 @@
 
 ORIGIN_DIR=$(pwd)
 TEMP_DIR=$ORIGIN_DIR/temp
+CONFIG_DIR=$ORIGIN_DIR/config
 
 function program_exists {
     local return_=0
@@ -54,6 +55,8 @@ else
     cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
     sed "/^export ZSH=/ c\ ZSH=$ZSH" ~/.zshrc > ~/.zshrc-temp && mv ~/.zshrc-temp ~/.zshrc
 fi
+
+cat $CONFIG_DIR/zshrc.config.sh >> ~/.zshrc
 
 #VIM Setup
 if [ $(program_exists vim) -eq 0 ]; then
