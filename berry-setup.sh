@@ -37,9 +37,16 @@ function script_cleanup {
 ######################################
 script_setup
 
+sudo apt-get -y update
+sudo apt-get -y dist-upgrade
 
-#$sudo apt-get -y update
-#$sudo apt-get -y dist-upgrade
+#####################
+# GIT Configuration #
+#####################
+git config --global push.default simple
+git config --global user.email "mcnichol.m@gmail"
+git config --global user.name "Merklet"
+
 
 ###############################################
 # Setup Locales and make Default Locale EN_US #
