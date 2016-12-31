@@ -10,6 +10,18 @@ function program_exists {
     echo "$return_"
 }
 
+function script_setup {
+    if [ -d "$TEMP_DIR" ]; then
+        echo "Temp Directory Exists: $TEMP_DIR"
+	echo "Emptying Temp Directory"
+        rm -rf $TEMP_DIR/*
+    else
+	mkdir $TEMP_DIR
+    fi
+    
+    echo "Setup Complete"
+}
+
 function script_cleanup {
     if [ -d "$TEMP_DIR" ]; then
         echo "Removing Temp Directory"
@@ -19,10 +31,19 @@ function script_cleanup {
     echo "Cleanup Complete"
 }
 
+######################################
+#           SCRIPT SETUP             #
+# Setup Directories and Temp Folders #
+######################################
+script_setup
+
+
 #$sudo apt-get -y update
 #$sudo apt-get -y dist-upgrade
 
-#Setup Locales and make Default Locale EN_US
+###############################################
+# Setup Locales and make Default Locale EN_US #
+###############################################
 locale_pkg=$(dpkg -l locales | grep -i locales)
 installed=$(echo $locale_pkg | awk '{print $1}')
 package_name=$(echo $locale_pkg | awk '{print $2}')
@@ -33,8 +54,24 @@ else
     echo "Locales Not Installed. Installing"
     aptitude install locales
 fi
- 
-#ZSH Setup 
+
+sed "/^XKBLAYOUT=/ c\XKBLAYOUT=\"us\"" /etc/default/keyboard > $TEMP_DIR/keyboard.tmp
+
+######################################
+# Make Keyboard default to US layout #
+######################################
+IS_VALID_KEYBOARD_FILE=$(cat $TEMP_DIR/keyboard.tmp | grep 'XKBLAYOUT="us"' | wc -l)
+if [ $IS_VALID_KEYBOARD_FILE -eq 1 ]; then
+    sudo cp $TEMP_DIR/keyboard.tmp  /etc/default/keyboard
+else
+    echo "Error creating US Keyboard Layout"
+    echo "Keyboard Temp File: "
+    cat $TEMP_DIR/keyboard.tmp
+fi
+
+#############
+# ZSH Setup #
+#############
 CHECK_ZSH_INSTALLED=$(grep /zsh$ /etc/shells | wc -l)
 if [ ! $CHECK_ZSH_INSTALLED -ge 1 ]; then
     printf "Zsh is not installed"
