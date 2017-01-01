@@ -19,7 +19,7 @@ function script_setup {
 	mkdir $TEMP_DIR
     fi
     
-    echo "Setup Complete"
+    echo "Script Setup Complete"
 }
 
 function script_cleanup {
@@ -37,6 +37,9 @@ function script_cleanup {
 ######################################
 script_setup
 
+########################################
+# Update Raspberry Pi to latest Distro #
+########################################
 sudo apt-get -y update
 sudo apt-get -y dist-upgrade
 
@@ -47,10 +50,9 @@ git config --global push.default simple
 git config --global user.email "mcnichol.m@gmail"
 git config --global user.name "Merklet"
 
-
-###############################################
-# Setup Locales and make Default Locale EN_US #
-###############################################
+#####################################################
+# Setup Locales and Default Keyboard Layout (EN_US) #
+#####################################################
 locale_pkg=$(dpkg -l locales | grep -i locales)
 installed=$(echo $locale_pkg | awk '{print $1}')
 package_name=$(echo $locale_pkg | awk '{print $2}')
@@ -64,9 +66,6 @@ fi
 
 sed "/^XKBLAYOUT=/ c\XKBLAYOUT=\"us\"" /etc/default/keyboard > $TEMP_DIR/keyboard.tmp
 
-######################################
-# Make Keyboard default to US layout #
-######################################
 IS_VALID_KEYBOARD_FILE=$(cat $TEMP_DIR/keyboard.tmp | grep 'XKBLAYOUT="us"' | wc -l)
 if [ $IS_VALID_KEYBOARD_FILE -eq 1 ]; then
     sudo cp $TEMP_DIR/keyboard.tmp  /etc/default/keyboard
@@ -85,8 +84,12 @@ if [ ! $CHECK_ZSH_INSTALLED -ge 1 ]; then
     sudo apt-get -y install zsh
 fi
 
-#oh-my-zsh setup
-#https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh
+sudo chsh -s $(which zsh)
+
+###################
+# oh-my-zsh setup #
+###################
+#Source: https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh
 if [ ! -n "$ZSH" ]; then
     ZSH=~/.oh-my-zsh
 fi
