@@ -3,6 +3,7 @@
 ORIGIN_DIR=$(pwd)
 TEMP_DIR=$ORIGIN_DIR/temp
 CONFIG_DIR=$ORIGIN_DIR/config
+DEFAULT_PASSWORD="raspberry"
 
 program_exists() {
     local return_=0
@@ -83,7 +84,7 @@ sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
 #####################
 git config --global push.default simple
 git config --global user.email "mcnichol.m@gmail"
-git config --global user.name "Merklet"
+git config --global user.name "Merkle"
 
 #####################################################
 # Setup Locales and Default Keyboard Layout (EN_US) #
@@ -119,7 +120,8 @@ if [ ! $CHECK_ZSH_INSTALLED -ge 1 ]; then
     sudo apt-get -y install zsh
 fi
 
-sudo chsh -s $(which zsh)
+echo "Changing Default Shell to ZSH"
+echo $DEFAULT_PASSWORD | chsh -s $(which zsh)
 
 ###################
 # oh-my-zsh setup #

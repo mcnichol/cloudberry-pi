@@ -1,4 +1,7 @@
+#cloudberry_script:START:LINUX_TERM_CHECK
 if [ "$TERM" = "linux" ]; then
+
+    #cloudberry_script:START:ZSH_CUSTOM_COLORS
     echo en "\e]P0073642" #black
     echo en "\e]P8002b36" #brblack
     echo en "\e]P1dc322f" #red
@@ -15,7 +18,12 @@ if [ "$TERM" = "linux" ]; then
     echo en "\e]PE93a1a1" #brcyan
     echo en "\e]P7eee8d5" #white
     echo en "\e]PFfdf6e3" #brwhite
-clear
-fi
+    clear
+    #cloudberry_script:END:ZSH_CUSTOM_COLORS
 
+fi
+#cloudberry_script:END:LINUX_TERM_CHECK
+
+#cloudberry_script:START:DEFAULT_USER
 DEFAULT_USER=$(whoami)
+#cloudberry_script:END:DEFAULT_USER
