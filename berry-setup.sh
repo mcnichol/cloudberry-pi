@@ -7,47 +7,36 @@ DEFAULT_PASSWORD="raspberry"
 
 program_exists() {
     local return_=0
-    hash $1 2>/dev/null || { local return_=1;}  
+    hash > /dev/null 2>&1 || { local return_=1;}  
     echo "$return_"
 }
 
 script_setup(){
-    echo "Running Setup Script"
+    printf "Running Setup Script\n"
 
     if [ -d "$TEMP_DIR" ]; then
-        echo "Temp Directory Exists: $TEMP_DIR"
-	echo "Emptying Temp Directory"
+        printf "Temp Directory Exists: $TEMP_DIR\n"
+        printf "Emptying Temp Directory\n"
         rm -rf $TEMP_DIR/*
     else
-	mkdir $TEMP_DIR
+        mkdir $TEMP_DIR
     fi
     
-    echo "Script Setup Complete"
+    printf "Script Setup Complete\n\n"
 }
 
 script_cleanup(){
-    echo "Running Cleanup Script"
+    printf "\nRunning Cleanup Script\n"
 
     if [ -d "$TEMP_DIR" ]; then
-        echo "Removing Temp Directory"
+        printf "Removing Temp Directory\n"
         rm -rf $TEMP_DIR
     fi
     
-    sudo apt-get -y autoremove
-    sudo apt-get -y clean
+    sudo apt-get -yqq autoremove
+    sudo apt-get -yqq clean
 
-    echo "Cleanup Complete"
-}
-
-get_init_sys(){
-    if command -v systemctl > /dev/null && systemctl | grep -q '\-\.mount'; then
-        SYSTEMD=1
-    elif [ -f /etc/init.d/cron ] && [ ! -h /etc/init.d/cron ]; then
-        SYSTEMD=0
-    else
-        echo "Unrecognised init system"
-        return 1
-    fi
+    printf "Cleanup Complete\n\n"
 }
 
 ######################################
@@ -59,27 +48,28 @@ script_setup
 ########################################
 # Update Raspberry Pi to latest Distro #
 ########################################
-echo "Updating Package Lists for the Pi"
-    sudo apt-get -yqq update
-echo "Upgrading Distribution"
-    sudo apt-get -yqq dist-upgrade
+printf "Updating Package Lists for the Pi\n"
+sudo apt-get -yqq update
+printf "Upgrading Distribution\n"
+sudo apt-get -yqq dist-upgrade
 
 #####################################
 # Default to Console Only Autologin #
 #####################################
-echo "Setting up Autologin to Console"
-    sudo systemctl set-default multi-user.target
-    sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service'
+printf "Setting up Autologin to Console\n"
+sudo systemctl set-default multi-user.target
+sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service'
 
 #############
 # SSH Setup #
 #############
-echo "Setting up SSH on Boot"
-sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
+printf "Setting up SSH on Boot\n"
+    sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
 
 #####################
 # GIT Configuration #
 #####################
+printf "Exportin GIT Global Configurations\n"
 git config --global push.default simple
 git config --global user.email "mcnichol.m@gmail"
 git config --global user.name "Merkle"
@@ -92,9 +82,9 @@ installed=$(echo $locale_pkg | awk '{print $1}')
 package_name=$(echo $locale_pkg | awk '{print $2}')
 
 if [ "$package_name" = "locales" ]; then
-    echo "Locales Installed"
+    printf "Locales Installed\n"
 else
-    echo "Locales Not Installed. Installing"
+    printf "Locales Not Installed. Installing\n"
     aptitude install locales
 fi
 
@@ -104,8 +94,8 @@ IS_VALID_KEYBOARD_FILE=$(cat $TEMP_DIR/keyboard.tmp | grep 'XKBLAYOUT="us"' | wc
 if [ $IS_VALID_KEYBOARD_FILE -eq 1 ]; then
     sudo cp $TEMP_DIR/keyboard.tmp  /etc/default/keyboard
 else
-    echo "Error creating US Keyboard Layout"
-    echo "Keyboard Temp File: "
+    printf "Error creating US Keyboard Layout\n"
+    printf "Keyboard Temp File: \n"
     cat $TEMP_DIR/keyboard.tmp
 fi
 
@@ -118,8 +108,8 @@ if [ ! $CHECK_ZSH_INSTALLED -ge 1 ]; then
     sudo apt-get -y install zsh
 fi
 
-echo "Changing Default Shell to ZSH"
-echo $DEFAULT_PASSWORD | chsh -s $(which zsh)
+printf "Changing Default Shell to ZSH\n"
+echo $DEFAULT_PASSWORD | chsh -s $(which zsh) > /dev/null 2>&1
 
 ###################
 # oh-my-zsh setup #
@@ -138,18 +128,23 @@ else
     sed "/^export ZSH=/ c\ ZSH=$ZSH" ~/.zshrc > ~/.zshrc-temp && mv ~/.zshrc-temp ~/.zshrc
 fi
 
-cat $CONFIG_DIR/zshrc.config.sh >> ~/.zshrc
-
+EXISTS_CUSTOM_CLOUDBERRY_ZSHRC=$(grep "cloudberry_script:START:CONFIG_MAIN" ~/.zshrc | wc -l )
+if [ ! $EXISTS_CUSTOM_CLOUDBERRY_ZSHRC -ge 1 ]; then
+    printf "Appending Custom zshrc Configuration\n"
+    cat $CONFIG_DIR/zsh/zshrc.config.sh >> ~/.zshrc
+else
+    printf "~/.zshrc already written to.\nRemove custom configurations to re-write\n"
+fi
 #VIM Setup
 if [ $(program_exists vim) -eq 0 ]; then
-    echo "VIM Already Installed"
+    printf "VIM Already Installed\n"
 else
     sudo apt-get -y install vim
 fi
 
 #TMUX Setup
 if [ $(program_exists tmux) -eq 0 ]; then
-    echo "TMUX Already Installed"
+    printf "TMUX Already Installed\n"
 else
     sudo apt-get -y install tmux
 fi
@@ -170,10 +165,10 @@ if [ ! -d ~/.vim/bash-support ]; then
     cd ~/.vim
     unzip $TEMP_DIR/bash-support.zip
 
-    echo "Generating Helptags for Bash Support"
+    printf "Generating Helptags for Bash Support\n"
     helpztags ~/.vim/doc
 else
-    echo "Bash Support Plugin is Already Installed"
+    printf "Bash Support Plugin is Already Installed\n"
 fi
 
 script_cleanup

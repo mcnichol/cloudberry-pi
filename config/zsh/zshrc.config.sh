@@ -1,3 +1,5 @@
+#cloudberry_script:START:CONFIG_MAIN
+
 #cloudberry_script:START:LINUX_TERM_CHECK
 if [ "$TERM" = "linux" ]; then
 
@@ -27,3 +29,5 @@ fi
 #cloudberry_script:START:DEFAULT_USER
 DEFAULT_USER=$(whoami)
 #cloudberry_script:END:DEFAULT_USER
+
+#cloudberry_script:END:CONFIG_MAIN
