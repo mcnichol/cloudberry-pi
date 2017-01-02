@@ -11,6 +11,8 @@ program_exists() {
 }
 
 script_setup(){
+    echo "Running Setup Script"
+
     if [ -d "$TEMP_DIR" ]; then
         echo "Temp Directory Exists: $TEMP_DIR"
 	echo "Emptying Temp Directory"
@@ -23,6 +25,8 @@ script_setup(){
 }
 
 script_cleanup(){
+    echo "Running Cleanup Script"
+
     if [ -d "$TEMP_DIR" ]; then
         echo "Removing Temp Directory"
         rm -rf $TEMP_DIR
@@ -54,8 +58,10 @@ script_setup
 ########################################
 # Update Raspberry Pi to latest Distro #
 ########################################
-sudo apt-get -y update
-sudo apt-get -y dist-upgrade
+echo "Updating Package Lists for the Pi"
+    sudo apt-get -yqq update
+echo "Upgrading Distribution"
+    sudo apt-get -yqq dist-upgrade
 
 #####################################
 # Default to Console Only Autologin #
