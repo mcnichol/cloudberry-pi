@@ -70,8 +70,6 @@ echo "Upgrading Distribution"
 echo "Setting up Autologin to Console"
     sudo systemctl set-default multi-user.target
     sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service'
-#    [ -e /etc/init.d/lightdm ] && sudo update-rc.d lightdm disable 2
-#    sudo sed /etc/inittab -i -e "s/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/1:2345:respawn:\/bin\/login -f pi tty1 <\/dev\/tty1 >\/dev\/tty1 2>&1/"
 
 #############
 # SSH Setup #
