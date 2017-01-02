@@ -4,13 +4,13 @@ ORIGIN_DIR=$(pwd)
 TEMP_DIR=$ORIGIN_DIR/temp
 CONFIG_DIR=$ORIGIN_DIR/config
 
-function program_exists {
+program_exists() {
     local return_=0
     hash $1 2>/dev/null || { local return_=1;}  
     echo "$return_"
 }
 
-function script_setup {
+script_setup(){
     if [ -d "$TEMP_DIR" ]; then
         echo "Temp Directory Exists: $TEMP_DIR"
 	echo "Emptying Temp Directory"
@@ -22,13 +22,24 @@ function script_setup {
     echo "Script Setup Complete"
 }
 
-function script_cleanup {
+script_cleanup(){
     if [ -d "$TEMP_DIR" ]; then
         echo "Removing Temp Directory"
         rm -rf $TEMP_DIR
     fi
     
     echo "Cleanup Complete"
+}
+
+get_init_sys(){
+    if command -v systemctl > /dev/null && systemctl | grep -q '\-\.mount'; then
+        SYSTEMD=1
+    elif [ -f /etc/init.d/cron ] && [ ! -h /etc/init.d/cron ]; then
+        SYSTEMD=0
+    else
+        echo "Unrecognised init system"
+        return 1
+    fi
 }
 
 ######################################
@@ -42,6 +53,22 @@ script_setup
 ########################################
 sudo apt-get -y update
 sudo apt-get -y dist-upgrade
+
+#####################################
+# Default to Console Only Autologin #
+#####################################
+if [ $SYSTEMD -eq 1 ]; then
+    systemctl set-default multi-user.target
+    ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service
+else
+    [ -e /etc/init.d/lightdm ] && update-rc.d lightdm disable 2
+    sed /etc/inittab -i -e "s/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/1:2345:respawn:\/bin\/login -f pi tty1 <\/dev\/tty1 >\/dev\/tty1 2>&1/"
+fi
+
+#############
+# SSH Setup #
+#############
+update-rc.d ssh enable && invoke-rc.d ssh start
 
 #####################
 # GIT Configuration #
