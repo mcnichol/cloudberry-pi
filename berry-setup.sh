@@ -28,6 +28,9 @@ script_cleanup(){
         rm -rf $TEMP_DIR
     fi
     
+    sudo apt-get -y autoremove
+    sudo apt-get -y clean
+
     echo "Cleanup Complete"
 }
 
@@ -57,18 +60,17 @@ sudo apt-get -y dist-upgrade
 #####################################
 # Default to Console Only Autologin #
 #####################################
-if [ $SYSTEMD -eq 1 ]; then
-    systemctl set-default multi-user.target
-    ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service
-else
-    [ -e /etc/init.d/lightdm ] && update-rc.d lightdm disable 2
-    sed /etc/inittab -i -e "s/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/1:2345:respawn:\/bin\/login -f pi tty1 <\/dev\/tty1 >\/dev\/tty1 2>&1/"
-fi
+echo "Setting up Autologin to Console"
+    sudo systemctl set-default multi-user.target
+#    sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service'
+#    [ -e /etc/init.d/lightdm ] && sudo update-rc.d lightdm disable 2
+#    sudo sed /etc/inittab -i -e "s/1:2345:respawn:\/sbin\/getty --noclear 38400 tty1/1:2345:respawn:\/bin\/login -f pi tty1 <\/dev\/tty1 >\/dev\/tty1 2>&1/"
 
 #############
 # SSH Setup #
 #############
-update-rc.d ssh enable && invoke-rc.d ssh start
+echo "Setting up SSH on Boot"
+sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
 
 #####################
 # GIT Configuration #
