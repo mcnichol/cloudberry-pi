@@ -61,6 +61,14 @@ printf "Setting up Autologin to Console\n"
 sudo systemctl set-default multi-user.target
 sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/getty.target.wants/getty@tty1.service'
 
+###################################
+# Disable Splash and Show Startup #
+###################################
+awk '{for(i=1;i<=NF;i++) if($i!="quiet" && $i!="splash"){printf $i" "} print ""}' $CMDLINE > $TEMP_DIR/cmdline.txt
+sudo chown root:root $TEMP_DIR/cmdline.txt
+sudo chmod 755 $TEMP_DIR/cmdline.txt
+sudo mv $TEMP_DIR/cmdline.txt /boot/cmdline.txt
+
 #############
 # SSH Setup #
 #############
@@ -198,3 +206,4 @@ script_cleanup
 ###########
 # Restart #
 ###########
+#sudo shutdown -r now
