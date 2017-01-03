@@ -206,4 +206,4 @@ script_cleanup
 ###########
 # Restart #
 ###########
-#sudo shutdown -r now
+sudo shutdown -r now
