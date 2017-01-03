@@ -4,10 +4,11 @@ ORIGIN_DIR=$(pwd)
 TEMP_DIR=$ORIGIN_DIR/temp
 CONFIG_DIR=$ORIGIN_DIR/config
 DEFAULT_PASSWORD="raspberry"
+CMDLINE=/boot/cmdline.txt
 
 program_exists() {
     local return_=0
-    hash > /dev/null 2>&1 || { local return_=1;}  
+    hash $1 2> /dev/null || { local return_=1;}  
     echo "$return_"
 }
 
@@ -64,7 +65,7 @@ sudo sh -c 'ln -fs /etc/systemd/system/autologin@.service /etc/systemd/system/ge
 # SSH Setup #
 #############
 printf "Setting up SSH on Boot\n"
-    sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
+sudo sh -c 'update-rc.d ssh enable && invoke-rc.d ssh start'
 
 #####################
 # GIT Configuration #
@@ -128,28 +129,49 @@ else
     sed "/^export ZSH=/ c\ ZSH=$ZSH" ~/.zshrc > ~/.zshrc-temp && mv ~/.zshrc-temp ~/.zshrc
 fi
 
+printf "Configuring ~/.zshrc\n"
 EXISTS_CUSTOM_CLOUDBERRY_ZSHRC=$(grep "cloudberry_script:START:CONFIG_MAIN" ~/.zshrc | wc -l )
-if [ ! $EXISTS_CUSTOM_CLOUDBERRY_ZSHRC -ge 1 ]; then
+if [ ! -f ~/.zshrc ]; then
+    cp $CONFIG_DIR/zsh/zshrc ~/.zshrc
+elif [ ! $EXISTS_CUSTOM_CLOUDBERRY_ZSHRC -ge 1 ]; then
     printf "Appending Custom zshrc Configuration\n"
-    cat $CONFIG_DIR/zsh/zshrc.config.sh >> ~/.zshrc
+    cat $CONFIG_DIR/zsh/zshrc >> ~/.zshrc
 else
     printf "~/.zshrc already written to.\nRemove custom configurations to re-write\n"
 fi
-#VIM Setup
+
+#############
+# VIM Setup #
+#############
 if [ $(program_exists vim) -eq 0 ]; then
     printf "VIM Already Installed\n"
 else
     sudo apt-get -y install vim
 fi
 
-#TMUX Setup
+printf "Configuring ~/.vimrc\n"
+EXISTS_CUSTOM_CLOUDBERRY_VIMRC=$(grep "cloudberry_script:START:CONFIG_MAIN" ~/.vimrc | wc -l )
+if [ ! -f ~/.vimrc ]; then
+    cp $CONFIG_DIR/vim/vimrc ~/.vimrc 
+elif [ ! $EXISTS_CUSTOM_CLOUDBERRY_VIMRC -ge 1 ]; then
+    printf "Appending Custom vimrc Configuration\n"
+    cat $CONFIG_DIR/vim/vimrc >> ~/.vimrc
+else
+    printf "~/.vimrc already written to.\nRemove custom configurations to re-write\n"
+fi
+
+##############
+# TMUX Setup #
+##############
 if [ $(program_exists tmux) -eq 0 ]; then
     printf "TMUX Already Installed\n"
 else
     sudo apt-get -y install tmux
 fi
 
-#Setup Bash Support (IDE Behavior)
+#####################################
+# Setup Bash Support (IDE Behavior) #
+#####################################
 if [ ! -d $TEMP_DIR ]; then
     mkdir $TEMP_DIR
 fi
@@ -172,3 +194,7 @@ else
 fi
 
 script_cleanup
+
+###########
+# Restart #
+###########

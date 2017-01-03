@@ -1,0 +1,14 @@
+#!/usr//bin bash
+
+"cloudberry_script:START:CONFIG_MAIN
+
+filetype plugin  on
+syntax on
+colorscheme darkblue
+
+set number
+set tabstop=4
+set shiftwidth=4
+set expandtab
+
+"cloudberry_script:END:CONFIG_MAIN
